@@ -15,6 +15,7 @@ org 0100h
 MAIN:
 
 begin:
+
 ;cls
 mov     ah, 00h         
         mov     al, 03h
@@ -43,56 +44,59 @@ outter:
 		nop
 		loop delay
 ; --------------------------------------------
-		cmp direct, 1
+		cmp direct, 1 ; check print [left to right][right to left]
 		je odd
 		jmp even
 		
-	odd: ; direction = 1
-		add y, 1
+	odd: 			; direction = 1
+		add y, 1	; check print [left to right][right to left]
 		cmp y, bndrgh
 		jle inner
 		mov y, bndrgh
 		jmp esc_inner
 
 	even: ; direction = 0
-		sub y, 1
+		sub y, 1	; print right to left in line
 		cmp y, bndlft
 		jge inner
 		mov y, bndlft
 		jmp esc_inner
 		
 esc_inner:
-	cmp hasChanged, 0
+	xor direct, 1		; direct = 1: print left to right
+				; direct = 0: print right to left
+	cmp hasChanged, 0	; to check form 0 or 1
 	je notChange
 	jmp changedForm
 
 	notChange:
-		xor direct, 1
-		inc x
-		cmp x, 25
+		inc x		; print top to down
+		cmp x, 25	; check if in last line
 		je change
 		jmp outter
 	
 	changedForm:
-		xor direct, 1
-		dec x
-		cmp x, 0
+		dec x		; print down to top
+		cmp x, 0	; check if in 1st line
 		jl exit
 		jmp outter
 change:
+; 1st form print top to down
+; 2nd form print down to top
 	mov x, 24
-	mov hasChanged, 1
+	mov hasChanged, 1	; form has Changed
 	jmp begin
 
 ;--- exit program ----
 exit:
 
+; set cursor to end 79,24
 mov 	ah,	02h
 mov	dh, 24 	;row
 mov 	dl, 79 	;column
 int 	10h
 
-;pause
+;pause >> press any key to continue
 mov ah, 07h
 int 21h
 
